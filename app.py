@@ -1,7 +1,7 @@
 import streamlit as st
 
 from neqsim.neqsimpython import neqsim
-from neqsim.thermo.thermoTools import fluid, phaseenvelope, TPflash, printFrame, dewt
+from neqsim.thermo.thermoTools import fluid, phaseenvelope, TPflash, printFrame, dewt, bubt, waterdewt
 import numpy as np
 import matplotlib.pyplot as plt
 import pandas as pd
@@ -18,7 +18,7 @@ def phaseenvelope(testSystem, plot=False):
     ax.set_title('PT envelope')
     ax.set_xlabel('Temperature [K]')
     ax.set_ylabel('Pressure [bar]')
-    ax.legend()
+    
     if(plot):
         ax.plot(list(data.getOperation().get("dewT") ),list(data.getOperation().get("dewP")), label="dew point")
         ax.plot(list(data.getOperation().get("bubT")),list(data.getOperation().get("bubP")), label="bubble point")
@@ -36,9 +36,22 @@ def phaseenvelope(testSystem, plot=False):
             #print("An exception occurred")
         
         
-        # ax.legend()
+    ax.legend()
         
     return fig
+
+
+st.set_page_config(
+     page_title="Dew Point Calculator",
+     page_icon="🧊",
+     layout="wide",
+     initial_sidebar_state="expanded",
+     menu_items={
+         'Get Help': 'https://www.extremelycoolapp.com/help',
+         'Report a bug': "https://www.extremelycoolapp.com/bug",
+         'About': "# This is a header. This is an *extremely* cool app!"
+     }
+ )
 
 
 with st.sidebar:
@@ -92,10 +105,16 @@ TPflash(fluid1)
 # printFrame(fluid1)
 
 dewPointT = dewt(fluid1)-273.15
+bubblePointT = bubt(fluid1)-273.15
 # print(fluid1.Pressure)
 print("dew point T ", dewPointT, " °C")
-st.write('Dew Point:')
-st.write(str(dewPointT) + " °C")
+# st.write('Dew Point:')
+# st.write(str(dewPointT) + " °C")
+
+st.metric(label="Dew Point", value=str(dewPointT) + " °C")
+# st.metric(label="Bubble Point", value=str(bubblePointT) + " °C")
+
+st.metric(label="Water Dew Point", value=str(waterdewt(fluid1) - 273.15) + " °C")
 st.markdown('***')
 try:
     st.text(pd.DataFrame(fluid1.createTable("")).to_string(header=False, index=False))
